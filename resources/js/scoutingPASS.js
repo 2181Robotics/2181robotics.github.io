@@ -835,6 +835,16 @@ function validateData() {
   return ret
 }
 
+function displayTeamNumber() {
+	document.getElementById('teamNumber').innerHTML = getCurrentTeamNumberFromRobot();
+	document.getElementById('autoteamNumber').innerHTML = getCurrentTeamNumberFromRobot();
+	document.getElementById('teleteamNumber').innerHTML = getCurrentTeamNumberFromRobot();
+	document.getElementById('endGameteamNumber').innerHTML = getCurrentTeamNumberFromRobot();
+	document.getElementById('miscteamNumber').innerHTML = getCurrentTeamNumberFromRobot();
+	
+	
+}
+
 function getData(useStr) {
   var str = ''
   var fd = new FormData()
