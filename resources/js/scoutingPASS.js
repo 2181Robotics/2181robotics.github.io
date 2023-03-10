@@ -12,6 +12,22 @@ var xThreshold = 0.3;
 var slide = 0;
 var enableGoogleSheets = false;
 var checkboxAs = 'YN';
+var teleHigh = 0;
+var teleMid = 0;
+var teleLow = 0;
+var autoHigh = 0;
+var autoMid = 0;
+var autoLow = 0;
+var teamNumberDisp = '';
+var autoBalance = 0;
+var teleBalance = 0;
+var autoDocked = 0;
+var teleDocked = 0;
+var autoGrabSecondPiece = 0;
+var autoMobile = 0;
+var autoTotal = 0;
+var teleTotal = 0;
+
 
 // Options
 var options = {
@@ -22,7 +38,7 @@ var options = {
 
 // Must be filled in: e=event, m=match#, l=level(q,qf,sf,f), t=team#, r=robot(r1,r2,b1..), s=scouter
 //var requiredFields = ["e", "m", "l", "t", "r", "s", "as"];
-var requiredFields = ["e", "m", "l", "r", "s"];
+var requiredFields = ["e", "m", "l", "r"];
 
 function addTimer(table, idx, name, data) {
   var row = table.insertRow(idx);
@@ -859,22 +875,43 @@ function getData(useStr) {
     checkedChar = '1';
     uncheckedChar = '0';
   }
+  clearScores()
   inputs = document.querySelectorAll("[id*='input_']");
   for (e of inputs) {
     code = e.id.substring(6)
     name = e.name
     radio = code.indexOf("_")
+	//str = str + code
     if (radio > -1) {
       if (e.checked) {
         if (start == false) {
-          str = str + ';'
+          //str = str + ';'
         } else {
           start = false
         }
         // str=str+code.substr(0,radio)+'='+code.substr(radio+1)
+		if(code.substr(0,radio) == "ad"){
+			
+			if(code.substr(radio+1) == "e"){
+				autoBalance = '1';
+			}else if(code.substr(radio+1) == "d"){
+				autoDocked = '1';
+			}
+			
+		}
+		
+		if(code.substr(0,radio) == "fs"){
+			
+			if(code.substr(radio+1) == "e"){
+				teleBalance = '1';
+			}else if(code.substr(radio+1) == "d"){
+				teleDocked = '1';
+			}
+			
+		}
         // document.getElementById("display_"+code.substr(0, radio)).value = code.substr(radio+1)
         if (useStr) {
-          str = str + code.substr(0, radio) + '=' + e.value
+          //str = str + /*code.substr(0, radio) + '=' +*/ e.value
         } else {
           fd.append(name, '' + e.value)
         }
@@ -882,20 +919,41 @@ function getData(useStr) {
       }
     } else {
       if (start == false) {
-        str = str + ';'
+        //str = str + ';'
       } else {
         start = false
       }
       if (e.value == "on") {
         if (e.checked) {
           if (useStr) {
-            str = str + code + '=' + checkedChar
+			  if(code == "am"){
+				  
+				  autoMobile = 1;
+				  
+			  }
+			  if(code == "agsp"){
+				  
+				  autoGrabSecondPiece = 1;
+				  
+			  }
+            //str = str + code + '=' + checkedChar
           } else {
             fd.append(name, checkedChar)
           }
         } else {
           if (useStr) {
-            str = str + code + '=' + uncheckedChar
+			  if(code == "am"){
+				  
+				  autoMobile = 0;
+				  
+			  }
+			  if(code == "agsp"){
+				  
+				  autoGrabSecondPiece = 0;
+				  
+			  }
+            //str = str + code + '=' + uncheckedChar
+			
           } else {
             fd.append(name, uncheckedChar)
           }
@@ -906,18 +964,137 @@ function getData(useStr) {
 	}
 	let val = e.value.split(';').join('-').replace(/"/g,'')
         if (useStr) {
-          str = str + code + '=' + val
+			
+			
+			if(code == "asg"){
+				val = val.substring(1, val.length-1)
+				if(val.indexOf(',')>-1){
+			  	var vals = val.split(',')
+				//vals.forEach(recordAutoScores())
+				for (i = 0; i < vals.length; i++) {
+				
+					recordAutoScores(vals[i])
+				
+				}
+				
+				}else if(val.length > 0) {
+					
+					recordAutoScores(val)
+				}
+				//str = str + "AutoHigh" + '=' + autoHigh.toString()
+				//str = str + "AutoMid" + '=' + autoMid.toString()
+				//str = str + "AutoLow" + '=' + autoLow.toString()
+			  }
+			  else if(code == "tsg"){
+				val = val.substring(1, val.length-1)
+				if(val.indexOf(',')>-1){
+			  	var vals = val.split(',')
+				for (i = 0; i < vals.length; i++) {
+				
+					recordTeleScores(vals[i])
+				
+				} 
+				
+				
+				
+				}else if(val.length > 0) {
+					
+					recordTeleScores(val)
+				}
+				//str = str + "TeleHigh" + '=' + teleHigh.toString()
+				//str = str + "TeleMid" + '=' + teleMid.toString()
+				//str = str + "TeleLow" + '=' + teleLow.toString()
+			  }
+			  else if(code == "t"){
+          //str = str + "Team " + '= ' + val + '\n' + '\n'
+		  
+		  teamNumberDisp = val
+			  }
+			  else{
+				  
+				  str = str + code + '=*' + val
+			  }
         } else {
           fd.append(name, val)
         }
       }
     }
   }
+  str = "Team " + teamNumberDisp + "\n\nAuto Scores\n\tHigh: " + autoHigh.toString() + "\n\tMid: " + autoMid.toString() + "\n\tLow: " + autoLow.toString()
+  
+  str = str + "\n\nTeleop Scores\n\tHigh: " + teleHigh.toString() + "\n\tMid: " + teleMid.toString() + "\n\tLow: " + teleLow.toString()
+  
+  //document.getElementById("data").value = str
+  
   if (useStr) {
     return str
   } else {
     return fd
   }
+}
+
+function recordTeleScores(item){
+
+	if(parseInt(item, 10) < 10){
+		
+		teleHigh += 1
+		
+	} else if(parseInt(item, 10) < 19){
+		teleMid += 1
+	} else {
+		
+		teleLow += 1
+		
+	}
+
+}
+
+function recordAutoScores(item){
+
+	if(parseInt(item, 10) < 10){
+		
+		autoHigh += 1
+		
+	} else if(parseInt(item, 10) < 19){
+		autoMid += 1
+	} else {
+		
+		autoLow += 1
+		
+	}
+
+}
+function clearScores(){
+
+	teleHigh = 0
+	teleMid = 0
+	teleLow = 0
+	autoHigh = 0
+	autoMid = 0
+	autoLow = 0
+	teleBalance = 0
+	teleDocked = 0
+	autoBalance = 0
+	autoDocked = 0
+	autoMobile = 0
+
+}
+
+function copyFormattedData(){
+  navigator.clipboard.writeText(getFormattedData(true));
+  document.getElementById('copyButton').setAttribute('value','Copied');
+}
+
+function getFormattedData(useStr){
+	autoTotal = 3*autoMobile + 6*autoHigh + 4*autoMid + 3*autoLow + 8*autoDocked + 12*autoBalance
+	var str = autoMobile.toString() + "\t" + 	autoHigh.toString() + "\t" + autoMid.toString() + "\t" + autoLow.toString() + "\t" + autoGrabSecondPiece.toString() + "\t" + autoDocked.toString() + "\t" + autoBalance.toString() + "\t" + autoTotal.toString()
+	teleTotal = 5*teleHigh + 3*teleMid + 2*teleLow 
+	str = str + "\t" + 	teleHigh.toString() + "\t" + teleMid.toString() + "\t" + teleLow.toString() + "\t" + teleTotal.toString() + "\t"
+
+	teleTotal += + 6*teleDocked + 10*teleBalance;
+	str = str + teleDocked.toString() + "\t" + teleBalance.toString() + "\t" + teleTotal.toString()
+	
+	return str
 }
 
 function updateQRHeader() {
@@ -944,9 +1121,9 @@ function qr_regenerate() {
   data = getData(true)
 
   // Regenerate QR Code
-  qr.makeCode(data)
+  //qr.makeCode(data)
 
-  updateQRHeader()
+  //updateQRHeader()
   return true
 }
 
@@ -958,7 +1135,7 @@ function clearForm() {
   var match = 0;
   var e = 0;
 
-  swipePage(-5)
+  swipePage(-2)
 
   // Increment match
   match = parseInt(document.getElementById("input_m").value)
@@ -1307,7 +1484,7 @@ function counter(element, step) {
 
 function newCycle(event)
 {
-  let timerID = event.firstChild;
+  /*let timerID = event.firstChild;
   let base = getIdBase(timerID.id);
   let inp = document.getElementById("input" + base)
   let cycleTime = inp.value
@@ -1320,11 +1497,11 @@ function newCycle(event)
     cycleInput.value = JSON.stringify(tempValue);
     let d = document.getElementById("display" + base);
     d.value = cycleInput.value.replace(/\"/g,'').replace(/\[/g, '').replace(/\]/g, '').replace(/,/g, ', ');
-  }
+  }*/
 }
 
 function undoCycle(event) {
-  let undoID = event.firstChild;
+  /*let undoID = event.firstChild;
   let uId = getIdBase(undoID.id);
   //Getting rid of last value
   let cycleInput = document.getElementById("cycletime" + uId);
@@ -1332,7 +1509,7 @@ function undoCycle(event) {
   tempValue.pop();
   cycleInput.value = JSON.stringify(tempValue);
   let d = document.getElementById("display" + uId);
-  d.value = cycleInput.value.replace(/\"/g,'').replace(/\[/g, '').replace(/\]/g, '').replace(/,/g, ', ');
+  d.value = cycleInput.value.replace(/\"/g,'').replace(/\[/g, '').replace(/\]/g, '').replace(/,/g, ', ');*/
 }
 
 function resetTimer(event) {
