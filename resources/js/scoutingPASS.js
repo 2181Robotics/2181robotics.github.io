@@ -1092,7 +1092,7 @@ function getFormattedData(useStr){
 	str = str + "\t" + 	teleHigh.toString() + "\t" + teleMid.toString() + "\t" + teleLow.toString() + "\t" + teleTotal.toString() + "\t"
 
 	teleTotal += + 6*teleDocked + 10*teleBalance;
-	str = str + teleDocked.toString() + "\t" + teleBalance.toString() + "\t" + teleTotal.toString()
+	str = str + teleDocked.toString() + "\t" + teleBalance.toString() + "\t" + (autoTele+teleTotal).toString()
 	
 	return str
 }

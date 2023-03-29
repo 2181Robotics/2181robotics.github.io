@@ -14,7 +14,7 @@ var config_data = `
     { "name": "Event",
       "code": "e",
       "type": "event",
-      "defaultValue": "2023mndu",
+      "defaultValue": "2023mnmi",
       "required": "true",
       "disabled": "true"
     },
